@@ -1,14 +1,128 @@
+@import url(https://fonts.googleapis.com/css?family=Roboto:300);
+
 body {
-    background-color: #a09d9d;
+    background: #F9FFFF; /* fallback for old browsers */
+    /* background: -webkit-linear-gradient(right, #76b852, #8DC26F);
+    background: -moz-linear-gradient(right, #76b852, #8DC26F);
+    background: -o-linear-gradient(right, #76b852, #8DC26F);
+    background: linear-gradient(to left, #76b852, #8DC26F); */
+    font-family: "Roboto", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;      
 }
 
-h1 {
-    color: #5ef4;
+/* CSS Code for forms in index.html, sign_up.html, and create_post.html */
+
+.login-page {
+    width: 360px;
 }
+
+.signup-page{
+    width: 360px;
+}
+
+.form {
+    position: relative;
+    z-index: 1;
+    background: #FFFFFF;
+    max-width: 360px;
+    margin: 0 auto 20px;
+    padding: 15px;
+    text-align: center;
+}
+
+.form input {
+    font-family: "Roboto", sans-serif;
+    outline: 0;
+    background: #f2f2f2;
+    width: 100%;
+    border: 0;
+    margin: 0 0 15px;
+    padding: 15px;
+    box-sizing: border-box;
+    font-size: 14px;
+}
+
+.form textarea {
+    font-family: "Roboto", sans-serif;
+    outline: 0;
+    background: #f2f2f2;
+    width: 100%;
+    max-width: 100%;
+    border: 0;
+    margin: 0 0 15px;
+    padding: 15px;
+    box-sizing: border-box;
+    font-size: 14px;
+}
+
+.form select {
+    font-family: "Roboto", sans-serif;
+    outline: 0;
+    background: #f2f2f2;
+    width: 100%;
+    max-width: 100%;
+    height: 40px;
+    border: 0;
+    margin: 0 0 15px;
+    padding: 5px;
+    box-sizing: border-box;
+    font-size: 14px;
+}
+
+.form label {
+    font-family: "Roboto", sans-serif;
+    font-weight: 700;
+}
+
+.form button {
+    font-family: "Roboto", sans-serif;
+    text-transform: uppercase;
+    background: #7AC9AB;
+    color: #FFFFFF;
+    outline: 0;
+    width: 100%;
+    border: 0;
+    margin: 0 0 15px;
+    padding: 15px;
+    font-size: 14px;
+    -webkit-transition: all 0.3 ease;
+    transition: all 0.3 ease;
+    cursor: pointer;
+}
+
+.form button:hover,.form button:active,.form button:focus {
+    background: #7AC9AB;
+}
+
+.form .message {
+    color: #b3b3b3;
+    margin: 15px 0 0;
+    font-size: 12px;
+}
+ 
+/* Code used to display posts in all_posts.html and profile.html */
 
 .container {
     margin-left: 0px;
     margin-right: 0px;
+}
+
+.container .post {
+    height: 90%;
+    min-width: 300px;
+}
+
+.container .center {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+@media(max-width: 1000px){
+    .container .post {
+        width: 400px;
+    }
 }
 
 .container .post img {
@@ -19,6 +133,10 @@ h1 {
     margin-left: auto;
     margin-right: auto;
     margin-bottom: 10px;
+}
+
+.container .post-entry {
+    min-height: 300px;
 }
 
 .container button {
@@ -33,6 +151,15 @@ h1 {
     -webkit-transition: opacity 0.8s;
 }
 
+.container .tags { 
+    color: black;
+    background-color: #7AC9AB;
+    border-radius: 10%;
+    margin: 10px;
+    font-size: 14px;
+    padding: 0;
+}
+
 .container button:hover {
     opacity: 1;
     transition: opacity 0.3s;
@@ -43,6 +170,24 @@ h1 {
     text-align: center;
 }
 
+/* Code for headers in all files */
+
+#go-back-text {
+    margin-top: 3%;
+    margin-left: 10%;
+}
+
+
+#go-back-link {
+    text-decoration: none;
+    margin: 15px 0 0;
+    font-size: 14px;
+}
+
+h1 {
+    color: #5ef4;
+}
+
 .title-text {
     text-align: center;
 }
@@ -50,9 +195,26 @@ h1 {
 #post-result-header{
     margin-top: 3%;
     margin-left: 10%;
+    text-align: left;
     color: black;
     font-weight: 600;
 }
+
+@media(max-width: 1000px){
+    #post-result-header{
+        margin-left: 0%;
+        text-align: center;
+    }
+
+    #go-back-text {
+        text-align: center;
+        margin-left: 0%;
+
+    }
+}
+
+
+/* Code for the navbar (header) in all pages */
 
 .navbar {
     width: 100%;
@@ -70,7 +232,7 @@ h1 {
     border: none;
     padding: 5px;
 }
-/*fix*/
+
 .navbar input::after {
     background-image: url(../images/search.png);
     display: inline-block;
@@ -80,7 +242,6 @@ h1 {
     vertical-align: middle;
 }
 
-  /* Navbar links */
 .navbar a {
     float: right;
     text-align: center;
@@ -95,16 +256,54 @@ h1 {
     width: 150px;
 }
 
-@media (max-width: 756px){
+#logo-image-2{
+    height:75px;
+    width: 150px;
+}
+
+@media (max-width: 830px){
     #logo-image{
         height:70px;
         width: 75px;
     }
+
+    #search-bar{
+        width: 40%;
+    }
+
+    #image-link{
+        margin: 0px;
+    }
 }
 
+#image-link {
+    margin: 10px;
+}
 
-.center{
+.image-link-container {
+    float:right;
+}
+
+.center {
+    display: block;
     margin-left: auto;
     margin-right: auto;
-    display: block;
+}
+
+@media (max-width: 600px) {
+    #logo-image{
+        height:70px;
+        width: 75px;
+    }
+
+    #search-bar {
+        width: 30%;
+    }
+}
+
+/* Code for profile.html */
+
+.user-information-field{
+    border-right: 1px solid #b0b0b0;
+    text-align: right;
 }

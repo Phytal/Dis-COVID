@@ -1,53 +1,126 @@
-var currentUsername= "";
+
+var currentUserEmail = "";
+var currentUsername = "";
+var post_counter = 0;
+
+var timer; //initialized in form.addEventListener
+
+// Get the current user's email and username
 firebase.auth().onAuthStateChanged(user => {
     if (user) {
+        currentUserEmail = user.email;
         currentUsername = user.displayName;
-        document.getElementById('logout').style.visibility = 'visible';
-    } else {
-        document.getElementById('logout').style.visibility = 'hidden';
+        console.log(currentUserEmail, "\nuser logged in:\n", user);
+        getPostDocNumber();
     }
 });
 
-/* Test code to add data to firestore */
-//create a constant to represent the form in which data is inputted 
-const form = document.querySelector('#add-post-form');
+//Formats a string in titlecase format
+function titleCase(str) {
+    str = str.toLowerCase().split(' ');
+    for (var i = 0; i < str.length; i++) {
+        str[i] = str[i].charAt(0).toUpperCase() + str[i].slice(1);
+    }
+    return str.join(' ');
+}
 
-//listen for a submit event when the user clicks "submit" on the form
-form.addEventListener('submit', function(e) {
-    //uploadFile();
-    e.preventDefault(); //prevents page from refreshing
-    var tagOne = form.tag1.value;
-    var tagTwo = form.tag2.value;
-    var tagThree = form.tag3.value;
-    alert(tagOne, " ", tagTwo, " ", tagThree);
-    firebase.firestore().collection('test').add({ //adds info to firestore
-        day: form.day.value, //we use this structor for each variable. Separate each catagory with a ","
-        time: form.time.value,
-        tag1: tagOne,
-        tag2: tagTwo,
-        tag3: tagThree,
-        username: currentUsername,
-    });
-    form.day.value = "";
-    form.time.value = "";
-}, false);
+function getPostDocNumber() {
+    firebase.firestore().collection('users').doc(currentUserEmail).get()
+        .then(doc => {
+            if (!doc.exists) {
+                console.log('No such document!');
+            } else {
+                console.log('Document data:', doc.data());
+                post_counter = doc.data().post_counter;
+            }
+        })
+        .catch(err => {
+            console.log('Error getting document', err);
+        });
+    console.log("successfully got post number");
+}
 
-function uploadImage(e) {
+// Listens for file selection
+document.getElementById('fileButton').addEventListener('change', function (e) {
     // Gets file
     var file = e.target.files[0];
     // Creates a storage reference ('folder_name/file_name' is how it's stored)
-    var storageRef = firebase.storage().ref('images/' + currentUserEmail + '/' + file.name);
+    //var storageRef = firebase.storage().ref();
+    //var imageRef = storageRef.child(file.name);
+    //var userImageRef = storageRef.child(currentUserEmail + "/" + file.name);
+    var storageRef = firebase.storage().ref('images/' + currentUserEmail + '/' + post_counter);
     // Upload file
-    var myUrl = "";
-    storageRef.getDownloadURL().then(function(url) {
-      // Insert url into an <img> tag to "download"
-      console.log(url);
-      console.log("Yasss");
-      firebase.firestore().collection('posts').add({
-        user: currentUserEmail,
-        img_url: url,
-      });
+    var task = storageRef.put(file); //uploads image to storage
+
+    console.log("image uploaded");
+});
+
+//listen for a submit event when the user clicks "submit" on the form
+const form = document.getElementById('add-post-form');
+
+form.addEventListener('submit', function (e) {
+    e.preventDefault(); //prevents page from refreshing
+
+    var tagOne = form.tag1.value;
+    if (tagOne == "Other") {
+        tagOne = titleCase(form.otherTag1.value);
+    }
+
+    var tagTwo = form.tag2.value;
+    if (tagTwo == "Other") {
+        tagTwo = titleCase(form.otherTag2.value);
+    }
+
+    var tagThree = form.tag3.value;
+    if (tagThree == "Other") {
+        tagThree = titleCase(form.otherTag3.value);
+    }
+
+    //if tags are identical, they are made so that they are not
+    if (tagOne == tagTwo || tagTwo == tagThree) {
+        tagTwo = "Default";
+    }
+
+    if (tagOne == tagThree) {
+        tagThree = "Default";
+    }
+
+    var subj = form.subject.value;
+    var msg = form.message.value;
+
+    var storageRef = firebase.storage().ref('images/' + currentUserEmail + '/' + post_counter);
+    storageRef.getDownloadURL().then(function (url) {
+        // Insert url into an <img> tag to "download"
+        //console.log(currentUserEmail + "." + post_counter);
+        console.log(url);
+        firebase.firestore().collection('posts').doc(currentUserEmail + "." + post_counter).set({
+            user: currentUsername,
+            user_email: currentUserEmail,
+            img_url: url,
+            tag1: tagOne,
+            tag2: tagTwo,
+            tag3: tagThree,
+            subject: subj,
+            message: msg,
+            likes: 0,
+            likes_users: [""],
+        }, { merge: true });
     });
 
-    var task = storageRef.put(file);
+    console.log("submitted");
+
+    //Increases post counter by one 
+    post_counter = post_counter + 1;
+    firebase.firestore().collection('users').doc(currentUserEmail).set({
+        post_counter: post_counter,
+    });
+
+    //after 2 seconds, redirect the user to the home page, where they can see all of the posts
+    timer = window.setTimeout(goToPosts(), 2000);
+}, false);
+
+function goToPosts() {
+    window.clearTimeout(timer);
+    console.log('here');
+    window.location.replace("all_posts.html"); //redirects user to home page
 }

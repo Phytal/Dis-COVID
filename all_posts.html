@@ -1,8 +1,10 @@
 <!DOCTYPE html>
     <head>
-        <title>All posts!</title>
+        <title>Dis-COVID</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="style/style.css">
+        <link rel="stylesheet" href="style/login.css">
+        <link rel="stylesheet" href="style/all_posts.css">
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" 
             integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" 
             crossorigin="anonymous">
@@ -16,98 +18,191 @@
         <!-- Add Firebase products that you want to use -->
         <script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-auth.js"></script>
         <script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-firestore.js"></script>
-        <script>
-            firebaseConfig = {
-                apiKey: "AIzaSyDAquTNfqjwa8bMBSzmyO_sEaeKhhq0rWQ",
-                authDomain: "dis-covid.firebaseapp.com",
-                databaseURL: "https://dis-covid.firebaseio.com",
-                projectId: "dis-covid",
-                storageBucket: "dis-covid.appspot.com",
-                messagingSenderId: "93140684291",
-                appId: "1:93140684291:web:b740d37d012982f706c836",
-                measurementId: "G-ZNYK27S4Z4"
-            }; 
-            // Initialize Firebase
-            firebase.initializeApp(firebaseConfig);
-            firebase.analytics();
-            // Initialize database
-            const db = firebase.firestore();
-            //db.settings({timestampsInSnapshots: true});
-            //Initializes authentication
-            const auth = firebase.auth();
-        </script>
         
-        <script>
-            // listen for auth status changes
-            firebase.auth().onAuthStateChanged(user => {
-                if(user) {
-                    console.log('Not redirecting');
-                } else {
-                    console.log('Redirecting to index.html');
-                    window.location.replace("index.html");
-                }
-            });
-        </script>
+        <script src="js/initialization.js"></script>
+        <script src="js/check_login_status.js"></script>
     </head>
     
     <body>
         <div class="navbar">
             <a href="all_posts.html" class="left nav-item help" id="indexHelp"><img src="images/logo-long.png" id="logo-image"></a>
-            <input type="search" placeholder="Search">
-            <!--<a href="profile.html" id="logout-link"><img src="images/profile.png" id="logout-img"></a>
-            <a href="favorites.html"><img src="images/heart.png"></a>-->
-            <a href="create_post.html" ><img src="images/create-post-image.png"></a>
-            <a href="index.html" ><img src="images/login.png" id="logout"></a>
-        </div>
-        <h1 id="post-result-header">These are the results for: </h1>
-        <div class="container">
-            <div class="row" id="all-posts">
-                
+            <input type="search" placeholder="Search" id="search-bar">
+            <div class="image-link-container">
+                <a href="index.html" id="image-link"><img src="images/login.png" id="logout"></a>
+                <a href="profile.html" id="image-link"><img src="images/profile.png"></a>
+                <a href="create_post.html" id="image-link"><img src="images/create-post-image.png"></a>       
             </div>
         </div>
 
+        <p id="go-back-text" style="display: none;"><a href="all_posts.html" id="go-back-link">Go back</a></p>  
+        <h1 id="post-result-header"></h1>
+        <div class="container container-fluid">
+            <div class="row" id="all-posts"></div>
+        </div>
+
+        <!--Displays all of the posts that are currently in the 'posts' database-->
         <script>
-            const testList = document.querySelector('#all-posts');
-
-            function renderTest(doc) {
-                let div = document.createElement('div');
-                let a = document.createElement('a');
-                let button = document.createElement('button');
-                let h2 = document.createElement('h2');
-                let image = document.createElement('img');
-                let h6 = document.createElement('h6');
-
-                div.className = "col-12 col-lg-4 justify-content-center";
-                a.id = "post-link";
-                button.className = "post";
-                image.id = "post-one-img";
-
-                a.href = doc.data().img_url;
-                h2.innerHTML = "hello";
-                image.src = doc.data().img_url;
-                h6.innerHTML = "hey";
-
-                button.appendChild(h2);
-                button.appendChild(image);
-                button.appendChild(h6);
-                
-                a.appendChild(button);
-
-                div.appendChild(a);
-                
-                testList.appendChild(div);
-            }
-            
-            let postRef = db.collection('posts');
-            let allPosts = postRef.get().then(snapshot => {
-                snapshot.forEach(doc => {
-                console.log(doc.id, '=>', doc.data().img_url);
-                renderTest(doc);
-                });
-            })
-            .catch(err => {
-                console.log('Error getting documents', err);
+            const search_bar = document.getElementById("search-bar");
+            var tag = "";
+            search_bar.addEventListener("change", function(e) {
+                e.preventDefault(); //prevent refresh
+                tag = search_bar.value;
+                console.log(tag);
+                displayAllPosts(titleCase(tag));
             });
+
+            displayAllPosts("");
+
+            function titleCase(str) {
+                str = str.toLowerCase().split(' ');
+                for (var i = 0; i < str.length; i++) {
+                    str[i] = str[i].charAt(0).toUpperCase() + str[i].slice(1); 
+                }
+                return str.join(' ');
+            }
+
+            function displayAllPosts(tag) {
+                const postList = document.querySelector('#all-posts');
+                postList.innerHTML = "";
+                function renderTest(doc) {
+                    /* Define variables -- what are you going to display */
+                    let div = document.createElement('div');
+                    let a = document.createElement('a');
+                    let button = document.createElement('button');
+                    let h2 = document.createElement('h2');
+                    let image = document.createElement('img');
+                    let h6 = document.createElement('h6');
+                    let buttonT1 = document.createElement('button');
+                    let buttonT2 = document.createElement('button');
+                    let buttonT3 = document.createElement('button');
+
+                    /* Define metadata -- e.g. classes, ids*/
+                    div.className = "col-12 col-lg-4 justify-content-center post-entry";
+                    a.id = "post-link";
+                    button.className = "post center";
+                    buttonT1.className = "tags";
+                    buttonT2.className = "tags";
+                    buttonT3.className = "tags";
+                    image.id = "post-one-img";
+
+                    buttonT1.innerHTML = doc.data().tag1;
+                    buttonT2.innerHTML = doc.data().tag2;
+                    buttonT3.innerHTML = doc.data().tag3;
+
+                    if (doc.data().tag1 == "") {
+                        buttonT1.style = "display: none;";
+                    }
+                    if (doc.data().tag2 == "") {
+                        buttonT2.style = "display: none;";
+                    }
+                    if (doc.data().tag3 == "") {
+                        buttonT3.style = "display: none;";
+                    }
+                    // a.href = doc.data().img_url;
+                    h2.innerHTML = doc.data().subject;
+                    image.src = doc.data().img_url;
+                    h6.innerHTML = "Created by: " + doc.data().user;
+
+                    button.appendChild(h2);
+                    button.appendChild(image);
+                    button.appendChild(h6);
+                    if(doc.data().tag1 != "Default"){
+                        button.appendChild(buttonT1);
+                    }
+                    if(doc.data().tag2 != "Default"){
+                        button.appendChild(buttonT2);
+                    }
+                    if(doc.data().tag3 != "Default"){
+                        button.appendChild(buttonT3);
+                    }
+
+                    a.appendChild(button);
+                    div.appendChild(a);
+                    
+                    postList.appendChild(div);
+                }
+                
+                if (tag.length == 0) {
+                    document.getElementById('go-back-text').style.display = 'none';
+                    document.getElementById("post-result-header").innerHTML = 
+                    "All posts:";
+                    db.collection('posts').get().then(snapshot => {
+                        snapshot.forEach(doc => {
+                        console.log(doc.id, '=>', doc.data().img_url);
+                        renderTest(doc);
+                        createOnClick();
+                        });
+                    }).catch(err => {
+                        console.log('Error getting documents', err);
+                    });
+                } else {
+                    document.getElementById('go-back-text').style.display = 'block';
+                    document.getElementById("post-result-header").innerHTML = 
+                    "These are the posts that include the tag '" + tag+"':";
+                    console.log("you searched something");
+                    db.collection('posts').where('tag1', '==', tag).get().then(snapshot => {
+                        snapshot.forEach(doc => {
+                        console.log(doc.id, '=>', doc.data().img_url);
+                        renderTest(doc);
+                        createOnClick();
+                        });
+                    }).catch(err => {
+                        console.log('Error getting documents', err);
+                    });
+
+                    db.collection('posts').where('tag2', '==', tag).get().then(snapshot => {
+                        snapshot.forEach(doc => {
+                        console.log(doc.id, '=>', doc.data().img_url);
+                        renderTest(doc);
+                        createOnClick();
+                        });
+                    }).catch(err => {
+                        console.log('Error getting documents', err);
+                    });
+
+                    db.collection('posts').where('tag3', '==', tag).get().then(snapshot => {
+                        snapshot.forEach(doc => {
+                        console.log(doc.id, '=>', doc.data().img_url);
+                        renderTest(doc);
+                        createOnClick();
+                        });
+                    }).catch(err => {
+                        console.log('Error getting documents', err);
+                    });
+                }
+            }
+
+            function createOnClick() {
+                var modal = document.getElementById("postModal");
+                console.log("got modal", modal)
+                // Get the button that opens the modal
+                var links = document.getElementsByClassName("post-link");
+                console.log("got button", links);
+                
+                // Get the <span> element that closes the modal
+                var span = document.getElementsByClassName("close")[0];
+                console.log("got span")
+                
+                for(var i = 0; i < links.length; i++) {
+                    // When the user clicks the button, open the modal 
+                    links[i].onclick = function() {
+                    modal.style.display = "block";
+                    console.log("button " + i + " is clicked");
+                    }
+                }
+                
+                // When the user clicks on <span> (x), close the modal
+                span.onclick = function() {
+                    modal.style.display = "none";
+                }
+                
+                // When the user clicks anywhere outside of the modal, close it
+                window.onclick = function(event) {
+                    if (event.target == modal) {
+                        modal.style.display = "none";
+                    }
+                }
+            }
         </script>
 
         <script src="js/logout.js"></script>
